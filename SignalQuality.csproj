@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Builds the same single source file as build.cmd, for people who'd rather use
+       Visual Studio, Rider or `dotnet build`. Targets .NET Framework 4.8, which is
+       already present on every supported Windows 10 and 11 machine, so the resulting
+       exe needs nothing installed. -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>SignalQuality</AssemblyName>
+    <RootNamespace>SignalQuality</RootNamespace>
+    <!-- build.cmd uses the C# 5 compiler that ships with Windows; keep both paths in step. -->
+    <LangVersion>5</LangVersion>
+    <!-- Version and title attributes live in the source file, so build.cmd gets them too. -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ApplicationIcon>assets\SignalQuality.ico</ApplicationIcon>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src\SignalQuality.cs" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>

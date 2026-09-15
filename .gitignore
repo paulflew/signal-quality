@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+build/
+*.exe
+*.pdb
+*.zip
+*.sha256
+
+# Editors
+.vs/
+.idea/
+*.user
+*.suo

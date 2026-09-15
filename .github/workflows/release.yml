@@ -1,0 +1,47 @@
+name: release
+
+# Tag a commit to publish, e.g.  git tag v1.0.0 && git push origin v1.0.0
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the app
+        run: dotnet build SignalQuality.csproj -c Release
+
+      - name: Build the test harness
+        run: dotnet build tests/Tests.csproj -c Release
+
+      - name: Run tests
+        run: tests\bin\Release\Tests.exe --offline
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist | Out-Null
+          Copy-Item bin/Release/SignalQuality.exe dist/
+          Copy-Item README.md, LICENSE dist/
+          Compress-Archive -Path dist/* -DestinationPath SignalQuality.zip
+          (Get-FileHash bin/Release/SignalQuality.exe -Algorithm SHA256).Hash.ToLower() + "  SignalQuality.exe" |
+            Out-File -Encoding ascii SignalQuality.exe.sha256
+          Get-Content SignalQuality.exe.sha256
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF -replace 'refs/tags/', '' } else { 'v0.0.0-dev' }
+          gh release create $tag bin/Release/SignalQuality.exe SignalQuality.zip SignalQuality.exe.sha256 `
+            --title "Signal Quality $tag" `
+            --notes "Download SignalQuality.exe and run it. Windows may warn about an unrecognised app because the exe isn't code signed: choose More info, then Run anyway. Verify the download against SignalQuality.exe.sha256 if you like."

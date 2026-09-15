@@ -1,0 +1,36 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the app
+        run: dotnet build SignalQuality.csproj -c Release
+
+      - name: Build the test harness
+        run: dotnet build tests/Tests.csproj -c Release
+
+      # Offline only: the live web checks depend on the runner's network and would make
+      # CI flaky. Run tests\bin\Release\Tests.exe with no flag locally for those.
+      - name: Run tests
+        run: tests\bin\Release\Tests.exe --offline
+
+      # The no-SDK path people get from a clean checkout on any Windows machine.
+      - name: Build with the compiler that ships with Windows
+        shell: cmd
+        run: build.cmd
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SignalQuality
+          path: bin/Release/SignalQuality.exe
+          if-no-files-found: error
