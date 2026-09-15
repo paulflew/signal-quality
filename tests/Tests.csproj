@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Console harness: `Tests.exe --offline` runs only the checks that need no network,
-       which is what CI runs. With no flag it also makes real web checks, and with a
-       folder argument it writes a contact sheet of every tray icon to that folder. -->
+  <!-- Console harness. With the offline flag (see CONTRIBUTING.md) it runs only the
+       checks that need no network, which is what CI runs. With no flag it also makes
+       real web checks, and with a folder argument it writes a contact sheet of every
+       tray icon to that folder. -->
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
