@@ -12,8 +12,10 @@
     <RootNamespace>SignalQuality</RootNamespace>
     <!-- build.cmd uses the C# 5 compiler that ships with Windows; keep both paths in step. -->
     <LangVersion>5</LangVersion>
-    <!-- Version and title attributes live in the source file, so build.cmd gets them too. -->
+    <!-- Version, title and target-framework attributes live in the source file, so
+         build.cmd gets them too. -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <ApplicationIcon>assets\SignalQuality.ico</ApplicationIcon>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

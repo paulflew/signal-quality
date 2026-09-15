@@ -11,6 +11,7 @@
     <RootNamespace>SignalQuality</RootNamespace>
     <LangVersion>5</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <StartupObject>SignalQuality.Tests</StartupObject>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
