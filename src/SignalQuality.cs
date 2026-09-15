@@ -40,9 +40,9 @@ using Microsoft.Win32;
 [assembly: AssemblyDescription("Connectivity traffic light for the Windows system tray")]
 [assembly: AssemblyCompany("Paul Flew")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Paul Flew")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyInformationalVersion("1.1.0")]
 [assembly: ComVisible(false)]
 
 namespace SignalQuality
