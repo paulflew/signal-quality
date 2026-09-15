@@ -32,8 +32,9 @@ jobs:
           Copy-Item bin/Release/SignalQuality.exe dist/
           Copy-Item README.md, LICENSE dist/
           Compress-Archive -Path dist/* -DestinationPath SignalQuality.zip
-          (Get-FileHash bin/Release/SignalQuality.exe -Algorithm SHA256).Hash.ToLower() + "  SignalQuality.exe" |
-            Out-File -Encoding ascii SignalQuality.exe.sha256
+          # LF line ending, so `sha256sum -c` works on Linux/WSL as well as reading fine on Windows.
+          $hash = (Get-FileHash bin/Release/SignalQuality.exe -Algorithm SHA256).Hash.ToLower()
+          [IO.File]::WriteAllText("$PWD/SignalQuality.exe.sha256", "$hash  SignalQuality.exe`n")
           Get-Content SignalQuality.exe.sha256
 
       - name: Publish release
