@@ -12,3 +12,6 @@ build/
 .idea/
 *.user
 *.suo
+
+# Installer output
+installer/out/

@@ -1,6 +1,8 @@
 name: release
 
-# Tag a commit to publish, e.g.  git tag v1.0.0 && git push origin v1.0.0
+# Tag a commit to publish, e.g.  git tag v1.1.0 && git push origin v1.1.0
+# The tag must match the version attributes in src/SignalQuality.cs.
+# Running this by hand builds and tests everything but publishes nothing.
 on:
   push:
     tags: ['v*']
@@ -25,24 +27,61 @@ jobs:
       - name: Run tests
         run: tests\bin\Release\Tests.exe --offline
 
+      - name: Check the tag matches the app version
+        shell: pwsh
+        run: |
+          $version = (Get-Item bin/Release/SignalQuality.exe).VersionInfo.ProductVersion
+          "APP_VERSION=$version" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME doesn't match the app version $version. Update the version attributes in src/SignalQuality.cs, or fix the tag."
+          }
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /Qp "/DAppVersion=$env:APP_VERSION" "/DSourceExe=$PWD\bin\Release\SignalQuality.exe" installer\SignalQuality.iss
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Test install and uninstall
+        shell: pwsh
+        run: installer\test-installer.ps1 -Setup "installer\out\SignalQuality-Setup-$env:APP_VERSION.exe"
+
       - name: Package
         shell: pwsh
         run: |
+          $setup = "SignalQuality-Setup-$env:APP_VERSION.exe"
           New-Item -ItemType Directory -Path dist | Out-Null
-          Copy-Item bin/Release/SignalQuality.exe dist/
-          Copy-Item README.md, LICENSE dist/
-          Compress-Archive -Path dist/* -DestinationPath SignalQuality.zip
-          # LF line ending, so `sha256sum -c` works on Linux/WSL as well as reading fine on Windows.
-          $hash = (Get-FileHash bin/Release/SignalQuality.exe -Algorithm SHA256).Hash.ToLower()
-          [IO.File]::WriteAllText("$PWD/SignalQuality.exe.sha256", "$hash  SignalQuality.exe`n")
-          Get-Content SignalQuality.exe.sha256
+          Copy-Item bin/Release/SignalQuality.exe, "installer/out/$setup", README.md, LICENSE dist/
+          Compress-Archive -Path dist/SignalQuality.exe, dist/README.md, dist/LICENSE -DestinationPath dist/SignalQuality.zip
+          # LF line endings, so `sha256sum -c` works on Linux/WSL as well as reading fine on Windows.
+          $lines = foreach ($file in @('SignalQuality.exe', $setup)) {
+            (Get-FileHash "dist/$file" -Algorithm SHA256).Hash.ToLower() + "  $file"
+          }
+          [IO.File]::WriteAllText("$PWD/dist/SHA256SUMS", ($lines -join "`n") + "`n")
+          Get-Content dist/SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: dist/
+          if-no-files-found: error
 
       - name: Publish release
+        if: github.ref_type == 'tag'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF -replace 'refs/tags/', '' } else { 'v0.0.0-dev' }
-          gh release create $tag bin/Release/SignalQuality.exe SignalQuality.zip SignalQuality.exe.sha256 `
-            --title "Signal Quality $tag" `
-            --notes "Download SignalQuality.exe and run it. Windows may warn about an unrecognised app because the exe isn't code signed: choose More info, then Run anyway. Verify the download against SignalQuality.exe.sha256 if you like."
+          $setup = "SignalQuality-Setup-$env:APP_VERSION.exe"
+          $notes = @(
+            "**Installer (recommended):** download ``$setup`` and run it. It installs for your user only, with no admin prompt, adds a Start menu shortcut, and can start Signal Quality when you sign in. Uninstall from Settings > Apps.",
+            "",
+            "**Portable:** download ``SignalQuality.exe`` and run it from wherever you like.",
+            "",
+            "Windows may warn about an unrecognised app because neither file is code signed: choose **More info**, then **Run anyway**. ``SHA256SUMS`` lists checksums for both."
+          ) -join "`n"
+          gh release create $env:GITHUB_REF_NAME "dist/$setup" dist/SignalQuality.exe dist/SignalQuality.zip dist/SHA256SUMS `
+            --title "Signal Quality $env:GITHUB_REF_NAME" --notes $notes

@@ -29,8 +29,24 @@ jobs:
         shell: cmd
         run: build.cmd
 
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $version = (Get-Item bin/Release/SignalQuality.exe).VersionInfo.ProductVersion
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /Qp "/DAppVersion=$version" "/DSourceExe=$PWD\bin\Release\SignalQuality.exe" installer\SignalQuality.iss
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Test install and uninstall
+        shell: pwsh
+        run: installer\test-installer.ps1 -Setup (Get-Item installer\out\SignalQuality-Setup-*.exe).FullName
+
       - uses: actions/upload-artifact@v4
         with:
           name: SignalQuality
-          path: bin/Release/SignalQuality.exe
+          path: |
+            bin/Release/SignalQuality.exe
+            installer/out/SignalQuality-Setup-*.exe
           if-no-files-found: error

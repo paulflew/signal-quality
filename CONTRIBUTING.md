@@ -21,6 +21,20 @@ tests\bin\Release\Tests.exe <folder>  :: also write a contact sheet of every tra
 
 Live checks depend on the network you're on, and some networks (public Wi-Fi especially) interfere with them. Treat a failure there as information about the network before assuming it's a bug.
 
+## Installer
+
+`installer\SignalQuality.iss` is an [Inno Setup 6](https://jrsoftware.org/isinfo.php) script for a per-user install. CI builds it on every push and runs `installer\test-installer.ps1`, which installs silently, checks the files, shortcut, startup entry and Settings → Apps listing, then uninstalls and checks they're all gone. To build it yourself, build the app first, then:
+
+```
+iscc /DAppVersion=1.2.3 installer\SignalQuality.iss
+```
+
+Only run `test-installer.ps1` locally if you're happy for it to really install and uninstall for your user: it stops a running copy and deletes `%APPDATA%\SignalQuality`. Never change the script's `AppId`, because Windows uses it to recognise upgrades.
+
+## Releasing
+
+Update the version attributes at the top of `src/SignalQuality.cs`, commit, then tag with the same version: `git tag v1.2.3` and `git push origin v1.2.3`. The release workflow refuses a tag that doesn't match the exe's version, then publishes the installer, the portable exe, a zip and `SHA256SUMS`.
+
 ## Changing the icon
 
 The tray icon is drawn in code in `IconFactory`. After changing it, run `tools\make-icon.cmd` to regenerate `assets\SignalQuality.ico`, which is the icon Explorer and Task Manager show. Check your change at 16 px as well as 32 px: the tray uses 16 px at 100% display scaling.

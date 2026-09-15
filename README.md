@@ -19,11 +19,13 @@ Hover for the average, the latest reading and the failure rate. Click the light 
 
 ## Install
 
-1. Download `SignalQuality.exe` from the [latest release](../../releases/latest).
-2. Put it somewhere permanent, such as `%LOCALAPPDATA%\SignalQuality\`, and run it. There's no installer: it's one file, about 60 KB, and it needs nothing installed because it uses the .NET Framework already built into Windows 10 and 11.
-3. Turn on **Start with Windows** in the menu if you want it always running.
+Both options need nothing else installed: the app uses the .NET Framework already built into Windows 10 and 11.
 
-**Windows will warn you the first time.** The exe isn't code signed, so SmartScreen says "Windows protected your PC". Choose **More info → Run anyway**. If you'd rather check the download first, each release includes a SHA-256 checksum:
+**Installer (recommended).** Download `SignalQuality-Setup-x.y.z.exe` from the [latest release](../../releases/latest) and run it. It installs for your user only, with no admin prompt, into `%LOCALAPPDATA%\Programs\Signal Quality`. It adds a Start menu shortcut and offers to start Signal Quality when you sign in. Uninstall from *Settings → Apps*. (Releases after v1.0.0 include the installer.)
+
+**Portable.** Download `SignalQuality.exe`, a single file of about 60 KB, put it somewhere permanent such as `%LOCALAPPDATA%\SignalQuality\`, and run it. Turn on **Start with Windows** in its menu if you want it always running.
+
+**Windows will warn you the first time.** The exe isn't code signed, so SmartScreen says "Windows protected your PC". Choose **More info → Run anyway**. If you'd rather check the download first, each release includes SHA-256 checksums:
 
 ```powershell
 Get-FileHash .\SignalQuality.exe -Algorithm SHA256
@@ -65,7 +67,9 @@ tests\bin\Release\Tests.exe --offline        :: only the checks that need no net
 
 ## Uninstall
 
-Exit from the tray menu, then delete the exe, the `%APPDATA%\SignalQuality` folder, and, if you enabled it, the `SignalQuality` value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+**Installed:** *Settings → Apps → Signal Quality → Uninstall*. It stops the app and removes the files, the Start menu shortcut, the start-with-Windows entry and your settings.
+
+**Portable:** exit from the tray menu, then delete the exe, the `%APPDATA%\SignalQuality` folder, and, if you enabled it, the `SignalQuality` value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 
 ## Licence
 
